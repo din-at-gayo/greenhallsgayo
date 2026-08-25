@@ -17,7 +17,7 @@ export const Route = createFileRoute('/signup')({
 })
 
 const fieldClass =
-  'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
 function SignupPage() {
   const navigate = useNavigate()
@@ -49,7 +49,7 @@ function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-2 mb-6">
-          <DoorOpen className="w-7 h-7 text-blue-600" />
+          <DoorOpen className="w-7 h-7 text-brand-600" />
           <span className="text-xl font-semibold text-slate-900">RoomBook</span>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
@@ -103,14 +103,14 @@ function SignupPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium rounded-md py-2 transition"
+              className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-medium rounded-md py-2 transition"
             >
               {submitting ? 'Creating account…' : 'Create account'}
             </button>
           </form>
           <p className="text-sm text-slate-500 mt-4 text-center">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 font-medium">
+            <Link to="/login" className="text-brand-600 font-medium">
               Sign in
             </Link>
           </p>

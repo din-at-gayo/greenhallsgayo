@@ -13,7 +13,7 @@ export const Route = createFileRoute('/_app/rooms/')({
 })
 
 const fieldClass =
-  'rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  'rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
 function RoomsIndex() {
   const { rooms } = Route.useLoaderData()
@@ -56,7 +56,7 @@ function RoomsIndex() {
         <button
           onClick={() => setQuickBookRoomId(rooms[0]?.id ?? null)}
           disabled={rooms.length === 0}
-          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-md px-4 py-2"
+          className="flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-medium rounded-md px-4 py-2"
         >
           <Zap className="w-4 h-4" />
           Book a room now
@@ -106,7 +106,7 @@ function RoomsIndex() {
             key={room.id}
             to="/rooms/$roomId"
             params={{ roomId: String(room.id) }}
-            className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md hover:border-blue-200 transition block"
+            className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md hover:border-brand-200 transition block"
           >
             {room.photoUrl && (
               <img

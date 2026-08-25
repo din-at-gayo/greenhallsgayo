@@ -44,7 +44,7 @@ const emptyForm = {
 }
 
 const fieldClass =
-  'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
 function AdminRooms() {
   const { rooms } = Route.useLoaderData()
@@ -122,7 +122,7 @@ function AdminRooms() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md px-4 py-2"
+          className="flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-md px-4 py-2"
         >
           <Plus className="w-4 h-4" />
           Add room
@@ -173,7 +173,7 @@ function AdminRooms() {
                   <div className="flex justify-end gap-3">
                     <button
                       onClick={() => openEdit(room)}
-                      className="text-slate-500 hover:text-blue-600"
+                      className="text-slate-500 hover:text-brand-600"
                       aria-label={`Edit ${room.name}`}
                     >
                       <Pencil className="w-4 h-4" />
@@ -292,7 +292,7 @@ function AdminRooms() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 rounded-md bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium py-2"
+                  className="flex-1 rounded-md bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-medium py-2"
                 >
                   {submitting ? 'Saving…' : 'Save'}
                 </button>

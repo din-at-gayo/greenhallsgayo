@@ -16,7 +16,7 @@ export type BookingFormValues = {
 }
 
 const fieldClass =
-  'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
 export function BookingFormModal({
   rooms,
@@ -188,7 +188,7 @@ export function BookingFormModal({
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 rounded-md bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium py-2"
+              className="flex-1 rounded-md bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-medium py-2"
             >
               {submitting ? 'Saving…' : initial?.id ? 'Save changes' : 'Book room'}
             </button>

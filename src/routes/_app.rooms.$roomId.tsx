@@ -81,7 +81,7 @@ function RoomDetail() {
           </div>
           <button
             onClick={() => setShowBooking(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md px-4 py-2"
+            className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-md px-4 py-2"
           >
             Book this room
           </button>
