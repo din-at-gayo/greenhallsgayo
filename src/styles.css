@@ -1,5 +1,18 @@
 @import "tailwindcss" source("../");
 
+@theme {
+  --color-brand-50: #edfbf2;
+  --color-brand-100: #daf6e6;
+  --color-brand-200: #b9ecca;
+  --color-brand-300: #88ddad;
+  --color-brand-400: #3bce7b;
+  --color-brand-500: #009e45;
+  --color-brand-600: #008037;
+  --color-brand-700: #00662c;
+  --color-brand-800: #004c21;
+  --color-brand-900: #003818;
+}
+
 body {
   @apply m-0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",

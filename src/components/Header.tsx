@@ -4,7 +4,7 @@ import { logout } from '../server/auth.functions.js'
 import type { SessionUser } from '../server/auth.server.js'
 
 const linkClass =
-  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 [&.active]:bg-blue-50 [&.active]:text-blue-700'
+  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 [&.active]:bg-brand-50 [&.active]:text-brand-700'
 
 export function Header({ user }: { user: SessionUser }) {
   const navigate = useNavigate()
@@ -24,7 +24,7 @@ export function Header({ user }: { user: SessionUser }) {
             to="/rooms"
             className="font-semibold text-slate-900 flex items-center gap-2"
           >
-            <DoorOpen className="w-5 h-5 text-blue-600" />
+            <DoorOpen className="w-5 h-5 text-brand-600" />
             RoomBook
           </Link>
           <nav className="hidden sm:flex items-center gap-1">

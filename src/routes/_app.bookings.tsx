@@ -71,7 +71,7 @@ function MyBookings() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setEditingId(b.id)}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-800 px-3 py-1.5 rounded-md border border-slate-200"
+                    className="text-sm font-medium text-brand-600 hover:text-brand-800 px-3 py-1.5 rounded-md border border-slate-200"
                   >
                     Edit
                   </button>

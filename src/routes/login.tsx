@@ -17,12 +17,15 @@ export const Route = createFileRoute('/login')({
 })
 
 const fieldClass =
-  'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+  'w-full rounded-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500'
 
 function LoginPage() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('employee@example.com')
-  const [password, setPassword] = useState('password123')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [focusedField, setFocusedField] = useState<'email' | 'password' | null>(
+    null,
+  )
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -48,7 +51,7 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-2 mb-6">
-          <DoorOpen className="w-7 h-7 text-blue-600" />
+          <DoorOpen className="w-7 h-7 text-brand-600" />
           <span className="text-xl font-semibold text-slate-900">RoomBook</span>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
@@ -66,6 +69,11 @@ function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder={
+                  focusedField === 'email' ? '' : 'name@company.com'
+                }
+                onFocus={() => setFocusedField('email')}
+                onBlur={() => setFocusedField(null)}
                 className={fieldClass}
               />
             </div>
@@ -78,6 +86,9 @@ function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder={focusedField === 'password' ? '' : '*****'}
+                onFocus={() => setFocusedField('password')}
+                onBlur={() => setFocusedField(null)}
                 className={fieldClass}
               />
             </div>
@@ -85,21 +96,17 @@ function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium rounded-md py-2 transition"
+              className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-medium rounded-md py-2 transition"
             >
               {submitting ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
           <p className="text-sm text-slate-500 mt-4 text-center">
             No account?{' '}
-            <Link to="/signup" className="text-blue-600 font-medium">
+            <Link to="/signup" className="text-brand-600 font-medium">
               Sign up
             </Link>
           </p>
-          <div className="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-400 space-y-0.5">
-            <p>Demo admin: admin@example.com / password123</p>
-            <p>Demo employee: employee@example.com / password123</p>
-          </div>
         </div>
       </div>
     </div>
