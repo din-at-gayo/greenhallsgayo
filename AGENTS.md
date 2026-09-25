@@ -53,6 +53,18 @@ prevention, and both `createBooking` and `updateBooking` call it. When editing,
 pass the booking's own id as `excludeBookingId` so it does not conflict with
 itself. Never move this check into the UI.
 
+**Recurring bookings are expanded rows.** A series is stored as up to
+`MAX_OCCURRENCES` (5) ordinary `bookings` rows sharing a `series_id`; there is
+no recurrence rule evaluated at read time. `expandOccurrences()` in
+`src/lib/recurrence.ts` generates the dates, and `createBooking` runs every
+occurrence through `findOverlappingBooking()`. If some dates clash it returns
+`{ conflicts }` instead of booking, and only books the free dates when the
+client resubmits with `skipConflicts: true` after the user has confirmed.
+
+**Calendar feed.** `/api/calendar/<token>.ics` is a public iCal feed, and the
+per-user `users.calendar_token` in the URL is the only credential. It uses
+floating times, so it inherits the wall-clock assumption below.
+
 **Times are wall-clock strings.** `bookings.start_time` / `end_time` use Drizzle
 `timestamp(..., { mode: 'string' })`, so values round-trip as
 `YYYY-MM-DDTHH:mm` with no UTC conversion. This is intentional for the
