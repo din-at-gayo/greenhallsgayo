@@ -107,7 +107,7 @@ export function BookingFormModal({
 
       if ('error' in result) {
         setConflicts(null)
-        setError(result.error)
+        setError(result.error ?? 'Something went wrong')
         return
       }
       if ('conflicts' in result) {

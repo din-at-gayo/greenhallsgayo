@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, Users } from 'lucide-react'
 import { getRoom } from '../server/rooms.functions.js'
 import { getRoomBookingsForDay } from '../server/bookings.functions.js'
 import { BookingFormModal } from '../components/BookingFormModal.js'
+import { CheckInControl, useOfficeNow } from '../components/CheckInControl.js'
 import { formatTimeRange, todayValue } from '../lib/time.js'
 
 export const Route = createFileRoute('/_app/rooms/$roomId')({
@@ -26,7 +27,9 @@ export const Route = createFileRoute('/_app/rooms/$roomId')({
 
 function RoomDetail() {
   const { room, bookings, day } = Route.useLoaderData()
+  const { user } = Route.useRouteContext()
   const router = useRouter()
+  const officeTime = useOfficeNow()
   const [selectedDay, setSelectedDay] = useState(day)
   const [dayBookings, setDayBookings] = useState(bookings)
   const [showBooking, setShowBooking] = useState(false)
@@ -109,6 +112,14 @@ function RoomDetail() {
                 <div>
                   <p className="text-sm font-medium text-slate-900">{b.title}</p>
                   <p className="text-xs text-slate-500">Booked by {b.userName}</p>
+                  <div className="mt-1.5 empty:hidden">
+                    <CheckInControl
+                      booking={b}
+                      now={officeTime}
+                      canCheckIn={b.userId === user.id || user.role === 'admin'}
+                      onCheckedIn={() => loadDay(selectedDay)}
+                    />
+                  </div>
                 </div>
                 <span className="text-sm text-slate-600 whitespace-nowrap">
                   {formatTimeRange(b.startTime, b.endTime)}

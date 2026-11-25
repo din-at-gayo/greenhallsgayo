@@ -22,6 +22,14 @@ ORM, and Netlify Database (managed Postgres).
   next 15-minute slot.
 - **Accounts and roles** — email/password sign-up and login. `employee` can book
   rooms; `admin` can additionally manage rooms and view/cancel all bookings.
+- **Check-in & auto-release** — check in from 10 minutes before a meeting
+  starts. Bookings nobody checks into are released 15 minutes after the start
+  (office time, Africa/Accra), so the room shows as free again. A scheduled
+  function sweeps every 5 minutes, and the same check also runs whenever
+  availability is read or a booking is made.
+- **Room utilization analytics** — admins get occupancy vs. booked share of
+  office hours per room, check-in and no-show rates, hours recovered from
+  no-shows, and a weekday × hour heatmap over the last 7, 30 or 90 days.
 - **Notifications** — booking created / updated / cancelled events, plus attendee
   invites, are emitted through a single `notify()` function.
 

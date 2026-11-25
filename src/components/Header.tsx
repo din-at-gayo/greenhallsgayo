@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
-import { CalendarClock, DoorOpen, LogOut, Shield } from 'lucide-react'
+import { BarChart3, CalendarClock, DoorOpen, LogOut, Shield } from 'lucide-react'
 import { logout } from '../server/auth.functions.js'
 import type { SessionUser } from '../server/auth.server.js'
 
@@ -43,6 +43,10 @@ export function Header({ user }: { user: SessionUser }) {
                 </Link>
                 <Link to="/admin/bookings" className={linkClass}>
                   All Bookings
+                </Link>
+                <Link to="/admin/analytics" className={linkClass}>
+                  <BarChart3 className="w-4 h-4" />
+                  Analytics
                 </Link>
               </>
             )}

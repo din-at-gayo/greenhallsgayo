@@ -6,6 +6,7 @@ import { getRooms } from '../server/rooms.functions.js'
 import { getMyCalendarToken } from '../server/calendar.functions.js'
 import { BookingFormModal } from '../components/BookingFormModal.js'
 import { CalendarSyncPanel } from '../components/CalendarSyncPanel.js'
+import { CheckInControl, useOfficeNow } from '../components/CheckInControl.js'
 import { formatDateTime } from '../lib/time.js'
 import { googleCalendarEventUrl } from '../lib/calendar.js'
 import {
@@ -31,6 +32,7 @@ function MyBookings() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [cancellingId, setCancellingId] = useState<number | null>(null)
   const [seriesPromptId, setSeriesPromptId] = useState<number | null>(null)
+  const officeTime = useOfficeNow()
 
   const now = new Date()
   const upcoming = bookings.filter(
@@ -57,7 +59,9 @@ function MyBookings() {
     <div>
       <h1 className="text-xl font-semibold text-slate-900 mb-1">My Bookings</h1>
       <p className="text-sm text-slate-500 mb-6">
-        View, edit, or cancel your upcoming meetings.
+        View, edit, or cancel your upcoming meetings. Check in when you arrive —
+        rooms nobody checks into are released 15 minutes after the start so
+        others can use them.
       </p>
 
       <CalendarSyncPanel token={calendarToken} />
@@ -91,6 +95,13 @@ function MyBookings() {
                   <p className="text-sm text-slate-500">
                     {formatDateTime(b.startTime)} – {formatDateTime(b.endTime)}
                   </p>
+                  <div className="mt-2 empty:hidden">
+                    <CheckInControl
+                      booking={b}
+                      now={officeTime}
+                      onCheckedIn={() => router.invalidate()}
+                    />
+                  </div>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <a
@@ -175,8 +186,21 @@ function MyBookings() {
                     {b.roomName} · {formatDateTime(b.startTime)}
                   </p>
                 </div>
-                <span className="text-xs uppercase tracking-wide text-slate-400">
-                  {b.status === 'cancelled' ? 'Cancelled' : 'Past'}
+                <span
+                  className={`text-xs uppercase tracking-wide ${b.status === 'released' ? 'text-amber-700' : 'text-slate-400'}`}
+                  title={
+                    b.status === 'released'
+                      ? 'No one checked in, so the room was released for others.'
+                      : undefined
+                  }
+                >
+                  {b.status === 'cancelled'
+                    ? 'Cancelled'
+                    : b.status === 'released'
+                      ? 'Released · no-show'
+                      : b.checkedInAt
+                        ? 'Past · checked in'
+                        : 'Past'}
                 </span>
               </div>
             ))}
