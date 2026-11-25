@@ -1,6 +1,19 @@
 import { and, arrayContains, eq, gt, gte, lt, ne, or } from 'drizzle-orm'
 import { db } from '../../db/index.js'
 import { bookings, rooms, users } from '../../db/schema.js'
+import { utcDateToWallClock } from '../lib/time.js'
+
+/**
+ * `created_at` comes back as a Date (written by Postgres `now()` in UTC). The
+ * office is in Accra (UTC+0), so its UTC fields are the office wall clock;
+ * turn it into the same string form as start/end times for check-in maths.
+ */
+function withWallClockCreatedAt<T extends { createdAt: Date }>(rows: T[]) {
+  return rows.map((row) => ({
+    ...row,
+    createdAt: utcDateToWallClock(row.createdAt),
+  }))
+}
 
 /**
  * Returns an existing confirmed booking that overlaps the given range for this
@@ -67,6 +80,9 @@ export async function listBookingsForRoomOnDay(
       endTime: bookings.endTime,
       userId: bookings.userId,
       userName: users.name,
+      status: bookings.status,
+      checkedInAt: bookings.checkedInAt,
+      createdAt: bookings.createdAt,
     })
     .from(bookings)
     .innerJoin(users, eq(bookings.userId, users.id))
@@ -79,6 +95,7 @@ export async function listBookingsForRoomOnDay(
       ),
     )
     .orderBy(bookings.startTime)
+    .then(withWallClockCreatedAt)
 }
 
 export async function listBookingsForUser(userId: number) {
@@ -93,6 +110,9 @@ export async function listBookingsForUser(userId: number) {
       attendees: bookings.attendees,
       seriesId: bookings.seriesId,
       recurrence: bookings.recurrence,
+      checkedInAt: bookings.checkedInAt,
+      releasedAt: bookings.releasedAt,
+      createdAt: bookings.createdAt,
       roomId: bookings.roomId,
       roomName: rooms.name,
       roomLocation: rooms.location,
@@ -101,6 +121,7 @@ export async function listBookingsForUser(userId: number) {
     .innerJoin(rooms, eq(bookings.roomId, rooms.id))
     .where(eq(bookings.userId, userId))
     .orderBy(bookings.startTime)
+    .then(withWallClockCreatedAt)
 }
 
 export async function getBookingById(id: number) {
@@ -119,12 +140,16 @@ export async function listAllConfirmedBookings() {
       roomLocation: rooms.location,
       userName: users.name,
       userEmail: users.email,
+      status: bookings.status,
+      checkedInAt: bookings.checkedInAt,
+      createdAt: bookings.createdAt,
     })
     .from(bookings)
     .innerJoin(rooms, eq(bookings.roomId, rooms.id))
     .innerJoin(users, eq(bookings.userId, users.id))
     .where(eq(bookings.status, 'confirmed'))
     .orderBy(bookings.startTime)
+    .then(withWallClockCreatedAt)
 }
 
 /** Cancels the given occurrence and every later confirmed one in its series. */

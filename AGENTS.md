@@ -65,6 +65,29 @@ client resubmits with `skipConflicts: true` after the user has confirmed.
 per-user `users.calendar_token` in the URL is the only credential. It uses
 floating times, so it inherits the wall-clock assumption below.
 
+**Check-in and auto-release.** The organizer, an invited attendee or an admin
+can check in from `CHECK_IN_OPENS_BEFORE_MINUTES` (10) before the start.
+`releaseNoShows()` in `src/server/checkin.server.ts` flips unclaimed bookings
+to `status = 'released'` once `NO_SHOW_GRACE_MINUTES` (15) have passed since
+the start, or since creation if the booking was made after it started. It runs
+every 5 minutes from `netlify/functions/release-no-shows.mts` and also before
+every availability read and booking write. Do not remove those calls, because
+they are what frees a slot on time between scheduled runs. Released bookings
+no longer block the room because `findOverlappingBooking()` only sees
+`confirmed` ones. Only bookings that started in the last 24 hours are released,
+so older bookings from before check-in existed stay untouched.
+
+**Office time zone.** "Now" always comes from `officeNow()` in `src/lib/time.ts`,
+which reads the clock in `OFFICE_TIME_ZONE` (`Africa/Accra`, UTC+0, no DST),
+never from `new Date()` compared to a wall-clock string. `created_at` is
+written by Postgres `now()` in UTC and is compared directly to office time,
+which is only valid because Accra is UTC+0.
+
+**Utilization analytics.** `/admin/analytics` (admin only) is computed in
+`src/server/analytics.server.ts` against Mon–Fri 08:00–18:00 office hours.
+"Occupied" counts confirmed bookings and "booked" also counts released
+no-shows.
+
 **Times are wall-clock strings.** `bookings.start_time` / `end_time` use Drizzle
 `timestamp(..., { mode: 'string' })`, so values round-trip as
 `YYYY-MM-DDTHH:mm` with no UTC conversion. This is intentional for the

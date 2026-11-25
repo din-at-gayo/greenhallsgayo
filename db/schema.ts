@@ -44,9 +44,14 @@ export const bookings = pgTable('bookings', {
   startTime: timestamp('start_time', { mode: 'string' }).notNull(),
   endTime: timestamp('end_time', { mode: 'string' }).notNull(),
   attendees: text().array().notNull().default([]),
-  status: text().notNull().default('confirmed'), // 'confirmed' | 'cancelled'
+  // 'confirmed' | 'cancelled' | 'released' (auto-released no-show)
+  status: text().notNull().default('confirmed'),
   // Shared by every occurrence of a recurring booking; null for one-off bookings.
   seriesId: text('series_id'),
   recurrence: text(), // 'daily' | 'weekly' | 'biweekly' | 'monthly' | null
+  // Office wall-clock time someone checked in; null until then.
+  checkedInAt: timestamp('checked_in_at', { mode: 'string' }),
+  // Office wall-clock time the booking was auto-released as a no-show.
+  releasedAt: timestamp('released_at', { mode: 'string' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })

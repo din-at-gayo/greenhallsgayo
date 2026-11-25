@@ -1,12 +1,23 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { db } from '../../db/index.js'
 import { bookings, users } from '../../db/schema.js'
 import { getCurrentUser } from './auth.server.js'
 import { getRoomById } from './rooms.server.js'
 import { notify } from './notifications.server.js'
+import { releaseNoShows } from './checkin.server.js'
+import {
+  CHECK_IN_OPENS_BEFORE_MINUTES,
+  getCheckInState,
+  NO_SHOW_GRACE_MINUTES,
+} from '../lib/checkin.js'
+import {
+  normalizeWallClock,
+  officeNow,
+  utcDateToWallClock,
+} from '../lib/time.js'
 import {
   expandOccurrences,
   MAX_OCCURRENCES,
@@ -50,12 +61,14 @@ export const getRoomBookingsForDay = createServerFn({ method: 'GET' })
     (data: { roomId: number; dayStart: string; dayEnd: string }) => data,
   )
   .handler(async ({ data }) => {
+    await releaseNoShows()
     return listBookingsForRoomOnDay(data.roomId, data.dayStart, data.dayEnd)
   })
 
 export const getMyBookings = createServerFn({ method: 'GET' }).handler(
   async () => {
     const user = await requireUser()
+    await releaseNoShows()
     return listBookingsForUser(user.id)
   },
 )
@@ -64,6 +77,7 @@ export const getAllBookingsForAdmin = createServerFn({ method: 'GET' }).handler(
   async () => {
     const user = await requireUser()
     if (user.role !== 'admin') throw new Error('Admin access required')
+    await releaseNoShows()
     return listAllConfirmedBookings()
   },
 )
@@ -108,6 +122,9 @@ export const createBooking = createServerFn({ method: 'POST' })
         } as const
       }
     }
+
+    // Free up no-show slots first so they can be rebooked straight away.
+    await releaseNoShows()
 
     // Server-side conflict check: never trust the client's time picker.
     const { available, conflicting } = await partitionOccurrencesByConflict(
@@ -190,6 +207,7 @@ export const updateBooking = createServerFn({ method: 'POST' })
       return { error: 'Room not found or inactive' } as const
     }
 
+    await releaseNoShows()
     const conflict = await findOverlappingBooking(
       data.roomId,
       data.startTime,
@@ -200,6 +218,9 @@ export const updateBooking = createServerFn({ method: 'POST' })
       return { error: CONFLICT_MESSAGE } as const
     }
 
+    const slotChanged =
+      normalizeWallClock(existing.startTime) !==
+        normalizeWallClock(data.startTime) || existing.roomId !== data.roomId
     const [booking] = await db
       .update(bookings)
       .set({
@@ -209,6 +230,9 @@ export const updateBooking = createServerFn({ method: 'POST' })
         startTime: data.startTime,
         endTime: data.endTime,
         attendees: data.attendees,
+        // A check-in belongs to the original slot; moving or switching rooms
+        // means checking in again at the new time.
+        checkedInAt: slotChanged ? null : existing.checkedInAt,
       })
       .where(eq(bookings.id, data.id))
       .returning()
@@ -270,4 +294,56 @@ export const cancelBooking = createServerFn({ method: 'POST' })
     }
 
     return { success: true } as const
+  })
+
+export const checkInBooking = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ id: z.number().int() }))
+  .handler(async ({ data }) => {
+    const user = await requireUser()
+    // Release anything overdue first, so a late check-in cannot reclaim a
+    // slot that should already have been freed.
+    await releaseNoShows()
+    const existing = await getBookingById(data.id)
+
+    if (!existing) return { error: 'Booking not found' } as const
+    const isOwner = existing.userId === user.id
+    const isAttendee = existing.attendees.includes(user.email)
+    if (!isOwner && !isAttendee && user.role !== 'admin') {
+      return {
+        error: 'Only the organizer or an invited attendee can check in.',
+      } as const
+    }
+    if (existing.status === 'released') {
+      return {
+        error: `This booking was released because no one checked in within ${NO_SHOW_GRACE_MINUTES} minutes of the start.`,
+      } as const
+    }
+
+    const now = officeNow()
+    const state = getCheckInState(
+      { ...existing, createdAt: utcDateToWallClock(existing.createdAt) },
+      now,
+    )
+    switch (state) {
+      case 'inactive':
+        return { error: 'This booking is no longer active.' } as const
+      case 'checked_in':
+        return { success: true, checkedInAt: existing.checkedInAt! } as const
+      case 'not_open':
+        return {
+          error: `Check-in opens ${CHECK_IN_OPENS_BEFORE_MINUTES} minutes before the meeting starts.`,
+        } as const
+      case 'missed':
+        return { error: 'The check-in window for this meeting has closed.' } as const
+    }
+
+    // Guard on status so a concurrent release cannot be overwritten.
+    const [updated] = await db
+      .update(bookings)
+      .set({ checkedInAt: now })
+      .where(and(eq(bookings.id, data.id), eq(bookings.status, 'confirmed')))
+      .returning({ checkedInAt: bookings.checkedInAt })
+    if (!updated) return { error: 'This booking is no longer active.' } as const
+
+    return { success: true, checkedInAt: updated.checkedInAt! } as const
   })
