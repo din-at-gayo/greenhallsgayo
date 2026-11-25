@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { getMe } from '../server/auth.functions.js'
 import { Header } from '../components/Header.js'
+import { MobileNav } from '../components/pwa/MobileNav.js'
 
 export const Route = createFileRoute('/_app')({
   beforeLoad: async () => {
@@ -19,9 +20,10 @@ function AppLayout() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Header user={user} />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:pb-6">
         <Outlet />
       </main>
+      <MobileNav user={user} />
     </div>
   )
 }
