@@ -1,6 +1,7 @@
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
 import { BarChart3, CalendarClock, DoorOpen, LogOut, Shield } from 'lucide-react'
 import { logout } from '../server/auth.functions.js'
+import { InstallButton } from './pwa/InstallButton.js'
 import type { SessionUser } from '../server/auth.server.js'
 
 const linkClass =
@@ -17,7 +18,7 @@ export function Header({ user }: { user: SessionUser }) {
   }
 
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="border-b border-slate-200 bg-white pt-[env(safe-area-inset-top)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
         <div className="flex items-center gap-6">
           <Link
@@ -53,6 +54,7 @@ export function Header({ user }: { user: SessionUser }) {
           </nav>
         </div>
         <div className="flex items-center gap-3">
+          <InstallButton />
           <span className="text-sm text-slate-500 hidden sm:inline">
             {user.name}
           </span>
@@ -61,7 +63,8 @@ export function Header({ user }: { user: SessionUser }) {
             className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900"
           >
             <LogOut className="w-4 h-4" />
-            Log out
+            <span className="hidden sm:inline">Log out</span>
+            <span className="sr-only sm:hidden">Log out</span>
           </button>
         </div>
       </div>
